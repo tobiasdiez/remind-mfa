@@ -38,7 +38,7 @@ dependencies = [
 ]
 
 [project.scripts]
-remind-mfa = "remind_mfa.cli.main:app"
+remind-mfa = "remind_mfa.__main__:app"
 
 [dependency-groups]
 docs = [
