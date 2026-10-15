@@ -17,6 +17,7 @@ from remind_mfa.atlas_coupling import (
     AtlasShareMode,
     copy_demand_to_atlas,
     copy_trade_to_mfa,
+    default_atlas_trade_source,
     execute_command,
     get_coupling_paths,
     scenario_pkbudg_is_effective,
@@ -102,17 +103,7 @@ def copy_trade(
     _warn_if_scenario_pkbudg_ignored(model, scenario_pkbudg)
     paths = get_coupling_paths(model, ["default", "atlas_run2"])
     if not source:
-        variant_value = variant.value.replace("-", "_")
-        model_folder = "future" if model == ModelNames.STEEL else "future_plastics"
-        source = (
-            ATLAS_TRADE_ROOT
-            / "outputs"
-            / "output_no_cet"
-            / model_folder
-            / variant_value
-            / "cache"
-            / f"future_projections_summary_{variant_value}.xlsx"
-        )
+        source = default_atlas_trade_source(model, variant)
     imports_path, exports_path = copy_trade_to_mfa(
         model,
         source,
