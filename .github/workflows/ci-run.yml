@@ -29,11 +29,13 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       # The run of all models, which the ci layer writes and blicket loads as one run; its build
       # is deployed as the viewer, after a comparison with the build of the baseline run, whose
-      # Markdown summary blicket writes to $SUMMARY.
+      # Markdown summary blicket writes to $SUMMARY. The baseline run gets its own prefix, so
+      # that its run id differs: the viewer offers a comparison only against another run.
       RUN: data_out/ci_series
-      BASELINE_BUILD: ${{ runner.temp }}/baseline_build
-      BUILD: ${{ runner.temp }}/build
-      SUMMARY: ${{ runner.temp }}/comparison_summary.md
+      BASELINE_RUN: data_out/baseline_series
+      BASELINE_BUILD: ${{ github.workspace }}/data_out/blicket_builds/baseline
+      BUILD: ${{ github.workspace }}/data_out/blicket_builds/current
+      SUMMARY: ${{ github.workspace }}/data_out/comparison_summary.md
       # The run is compared against the following baseline:
         # - Manual runs against the input
         # - Pushes to main against the previous commit
@@ -146,8 +148,9 @@ jobs:
         if ! cmp -s config/default.toml "$GITHUB_WORKSPACE/config/default.toml"; then
           uv run scripts/fetch_from_hpc.py mfa-archive hpc --config default --config ci
         fi
-        uv run remind-mfa --config default --config ci --model all --no-viewer
-        uv run blicket build "$RUN" --out "$BASELINE_BUILD"
+        printf '[base]\n    [base.export]\n        prefix = "baseline"\n' > config/baseline.toml
+        uv run remind-mfa --config default --config ci --config baseline --model all --no-viewer
+        uv run blicket build "$BASELINE_RUN" --out "$BASELINE_BUILD"
         ref="${BASELINE_REF#refs/heads/}"
         short_sha="$(git rev-parse --short HEAD)"
         if [ "${#ref}" -ge 40 ]; then label="$short_sha"; else label="$ref@$short_sha"; fi
