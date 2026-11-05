@@ -29,7 +29,8 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       # The run of all models, which the ci layer writes and blicket loads as one run; its build
       # is deployed as the viewer, after a comparison with the build of the baseline run, whose
-      # Markdown summary blicket writes to $SUMMARY.
+      # Markdown summary blicket writes to $SUMMARY. The baseline run gets its own prefix, so
+      # that its run id differs: the viewer offers a comparison only against another run.
       RUN: data_out/ci_series
       BASELINE_RUN: data_out/baseline_series
       BASELINE_BUILD: ${{ github.workspace }}/data_out/blicket_builds/baseline
